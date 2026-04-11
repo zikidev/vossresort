@@ -1,42 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import './App.css';
 
 function App() {
-  const [url, setUrl] = useState('');
-  const [text, setText] = useState('');
-  const [status, setStatus] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [logs, setLogs] = useState([]);
 
-  const handleSearch = async () => {
-    setLoading(true);
-    setStatus("Scanning...");
-    try {
-      const response = await fetch(`/api/parse?url=${url}&searchString=${text}`);
-      const data = await response.json();
-      setStatus(data.message || data.error);
-    } catch (err) {
-      setStatus("Error connecting to the parser.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    // When deployed, we fetch the log file from the root
+    fetch('/logs.json')
+      .then(res => res.json())
+      .then(data => setLogs(data))
+      .catch(e => console.log("No logs yet. Robot needs to run first!"));
+  }, []);
 
   return (
-    <div style={{ padding: '40px', fontFamily: 'sans-serif' }}>
-      <h1>URL Text Parser</h1>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '400px' }}>
-        <input 
-          placeholder="https://example.com" 
-          onChange={(e) => setUrl(e.target.value)} 
-        />
-        <input 
-          placeholder="Text to find..." 
-          onChange={(e) => setText(e.target.value)} 
-        />
-        <button onClick={handleSearch} disabled={loading}>
-          {loading ? "Searching..." : "Check URL"}
-        </button>
+    <div className="App">
+      <h1>Voss Ski Locker Monitor</h1>
+      <div className="status-card">
+        <h2>Latest Status: {logs[0]?.found ? "✅ AVAILABLE" : "❌ BOOKED"}</h2>
       </div>
-      {status && <p><strong>Result:</strong> {status}</p>}
+      
+      <h3>Recent History</h3>
+      <ul>
+        {logs.map((log, i) => (
+          <li key={i}>{log.date}: {log.found ? "Available!" : "Full"}</li>
+        ))}
+      </ul>
     </div>
   );
 }

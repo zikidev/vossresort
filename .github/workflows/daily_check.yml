@@ -1,0 +1,24 @@
+name: Ski Locker Watcher
+on:
+  schedule:
+    - cron: '0 8 * * *' # 8:00 AM UTC
+  workflow_dispatch: # Allows you to press a button to test it
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Scraper
+        run: |
+          npm install
+          node check_ski.js
+      - name: Save Results
+        run: |
+          git config --global user.name "SkiBot"
+          git config --global user.email "bot@github.com"
+          git add logs.json
+          git commit -m "Daily check update" || exit 0
+          git push

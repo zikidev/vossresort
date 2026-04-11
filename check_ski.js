@@ -1,6 +1,12 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
-const fs = require('fs');
+import axios from 'axios';
+import * as cheerio from 'cheerio';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Helper for ES modules to handle file paths
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function checkLocker() {
   const url = 'https://www.vossresort.no/skisenter/skiskap';
@@ -21,17 +27,16 @@ async function checkLocker() {
       link: linkFound ? (linkFound.startsWith('http') ? linkFound : `https://www.vossresort.no${linkFound}`) : null
     };
 
-    // Update logs.json
+    // Update logs.json (using relative path)
+    const logPath = path.join(process.cwd(), 'logs.json');
     let logs = [];
-    if (fs.existsSync('./logs.json')) {
-      logs = JSON.parse(fs.readFileSync('./logs.json', 'utf8'));
+    if (fs.existsSync(logPath)) {
+      logs = JSON.parse(fs.readFileSync(logPath, 'utf8'));
     }
     logs.unshift(result); 
-    fs.writeFileSync('./logs.json', JSON.stringify(logs.slice(0, 20), null, 2));
+    fs.writeFileSync(logPath, JSON.stringify(logs.slice(0, 20), null, 2));
 
     console.log(result.found ? "Locker Found!" : "Still booked.");
-    
-    // Optional: Add logic here to trigger email only if result.found is true
   } catch (error) {
     console.error("Error checking website:", error.message);
   }

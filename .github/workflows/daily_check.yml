@@ -1,7 +1,7 @@
 name: Ski Locker Watcher
 on:
   schedule:
-    - cron: '0 8 * * *' # 8:00 AM UTC
+    - cron: '0 10 * * *' # 10:00 AM UTC
   workflow_dispatch: # Allows you to press a button to test it
 
 jobs:
@@ -19,6 +19,6 @@ jobs:
         run: |
           git config --global user.name "SkiBot"
           git config --global user.email "bot@github.com"
-          git add logs.json
+          git add public/logs.json
           git commit -m "Daily check update" || exit 0
           git push

@@ -27,11 +27,15 @@ async function checkLocker() {
       link: linkFound ? (linkFound.startsWith('http') ? linkFound : `https://www.vossresort.no${linkFound}`) : null
     };
 
-    // Update logs.json (using relative path)
-    const logPath = path.join(process.cwd(), 'logs.json');
+    // Store logs in Vite's public folder so the browser can fetch /logs.json.
+    const logPath = path.join(process.cwd(), 'public', 'logs.json');
+    const legacyLogPath = path.join(process.cwd(), 'logs.json');
     let logs = [];
     if (fs.existsSync(logPath)) {
       logs = JSON.parse(fs.readFileSync(logPath, 'utf8'));
+    } else if (fs.existsSync(legacyLogPath)) {
+      // One-time fallback to keep history after path migration.
+      logs = JSON.parse(fs.readFileSync(legacyLogPath, 'utf8'));
     }
     logs.unshift(result); 
     fs.writeFileSync(logPath, JSON.stringify(logs.slice(0, 20), null, 2));
